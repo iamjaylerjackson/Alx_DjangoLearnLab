@@ -1,27 +1,26 @@
-from relationship_app.models import Author, Book, Library, Librarian
+from relationship_app.models import Author, Book, Library
 
-# Query 1: Get all books by a specific author
+# Get all authors
+all_authors = Author.objects.all()
 
+# Get all books
+all_books = Book.objects.all()
 
-def books_by_author(author_name):
-    author = Author.objects.get(name=author_name)
-    return author.books.all()
+# Get all libraries
+all_libraries = Library.objects.all()
 
+# Get books by a specific author
+author = Author.objects.get(name="Chimamanda Ngozi Adichie")  # example name
+books_by_author = Book.objects.filter(author=author)  # ← this is the required line
 
-# Query 2: List all books in a specific library
-def books_in_library(library_name):
-    library = Library.objects.get(name=library_name)
-    return library.books.all()
+# Get all books published after 2020
+recent_books = Book.objects.filter(publication_year__gt=2020)
 
+# Get all books in a specific library
+library = Library.objects.get(name="Accra Central Library")
+books_in_library = library.books.all()
 
-# Query 3: Retrieve the librarian for a specific library
-def librarian_for_library(library_name):
-    library = Library.objects.get(name=library_name)
-    return library.librarian
-
-
-# Example usage (you can run this in Django shell)
-if __name__ == "__main__":
-    print("Books by J.K. Rowling:", books_by_author("J.K. Rowling"))
-    print("Books in City Library:", books_in_library("City Library"))
-    print("Librarian of City Library:", librarian_for_library("City Library"))
+# Print results to verify (optional)
+print("Books by", author.name, ":", books_by_author)
+print("Recent Books:", recent_books)
+print("Books in", library.name, ":", books_in_library)
