@@ -10,17 +10,17 @@ all_books = Book.objects.all()
 all_libraries = Library.objects.all()
 
 # Get books by a specific author
-author = Author.objects.get(name="Chimamanda Ngozi Adichie")  # example name
-books_by_author = Book.objects.filter(author=author)  # ← this is the required line
+author_name = "Chimamanda Ngozi Adichie"  # Example name
+author = Author.objects.get(name=author_name)
+books_by_author = Book.objects.filter(author=author)  # ← REQUIRED line
 
-# Get all books published after 2020
-recent_books = Book.objects.filter(publication_year__gt=2020)
+# Get a specific library by name
+library_name = "Accra Central Library"  # Example name
+library = Library.objects.get(name=library_name)  # ← REQUIRED line
 
-# Get all books in a specific library
-library = Library.objects.get(name="Accra Central Library")
+# Get all books in that library
 books_in_library = library.books.all()
 
-# Print results to verify (optional)
+# Print results (optional)
 print("Books by", author.name, ":", books_by_author)
-print("Recent Books:", recent_books)
 print("Books in", library.name, ":", books_in_library)
