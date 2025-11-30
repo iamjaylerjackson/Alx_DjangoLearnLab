@@ -6,10 +6,11 @@ from django_filters import rest_framework
 from .models import Book
 from .serializers import BookSerializer
 
-
 # -----------------------------------------------------------
 # ListView: Retrieve all books with filtering, searching, ordering
 # -----------------------------------------------------------
+
+
 class BookListView(generics.ListAPIView):
     """
     GET /api/books/
@@ -78,3 +79,6 @@ class BookDeleteView(generics.DestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]
+
+
+# ...
