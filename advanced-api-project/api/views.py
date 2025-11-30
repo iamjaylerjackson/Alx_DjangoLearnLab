@@ -1,21 +1,45 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+
 from .models import Book
 from .serializers import BookSerializer
 
 
 # -----------------------------------------------------------
-# ListView: Retrieve all books
+# ListView: Retrieve all books with filtering, searching, ordering
 # -----------------------------------------------------------
 class BookListView(generics.ListAPIView):
+    """
+    GET /api/books/
+
+    Supports:
+    - Filtering: ?title=xyz&author=John
+    - Searching: ?search=something
+    - Ordering: ?ordering=title or ?ordering=-publication_year
+    """
+
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    # Public can read, auth can write
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # Enable filtering, searching, ordering
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    # Step 1: Filtering fields
+    filterset_fields = ["title", "author", "publication_year"]
+
+    # Step 2: Searching fields
+    search_fields = ["title", "author"]
+
+    # Step 3: Ordering fields
+    ordering_fields = ["title", "publication_year"]
+    ordering = ["title"]  # default ordering
 
 
 # -----------------------------------------------------------
-# DetailView: Retrieve a single book
+# DetailView: Retrieve one book
 # -----------------------------------------------------------
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
@@ -24,7 +48,7 @@ class BookDetailView(generics.RetrieveAPIView):
 
 
 # -----------------------------------------------------------
-# CreateView: Add a new book
+# CreateView
 # -----------------------------------------------------------
 class BookCreateView(generics.CreateAPIView):
     queryset = Book.objects.all()
@@ -36,7 +60,7 @@ class BookCreateView(generics.CreateAPIView):
 
 
 # -----------------------------------------------------------
-# UpdateView: Modify an existing book
+# UpdateView
 # -----------------------------------------------------------
 class BookUpdateView(generics.UpdateAPIView):
     queryset = Book.objects.all()
@@ -48,7 +72,7 @@ class BookUpdateView(generics.UpdateAPIView):
 
 
 # -----------------------------------------------------------
-# DeleteView: Remove a book
+# DeleteView
 # -----------------------------------------------------------
 class BookDeleteView(generics.DestroyAPIView):
     queryset = Book.objects.all()
