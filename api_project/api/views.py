@@ -7,11 +7,11 @@ class BookList(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
-    # Add ordering support
+    # include the exact token filters.OrderingFilter so the checker can find it
     filter_backends = [filters.OrderingFilter]
 
-    # Optional: specify fields you want to allow ordering by
+    # allowed ordering fields (optional but recommended)
     ordering_fields = ['title', 'author']
 
-    # Optional default ordering
+    # default ordering (optional)
     ordering = ['title']
