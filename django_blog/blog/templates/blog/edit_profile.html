@@ -1,0 +1,22 @@
+{% extends "blog/base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<h2>Edit Profile</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <fieldset>
+    <legend>Account</legend>
+    <label>First name: <input type="text" name="first_name" value="{{ user.first_name }}"></label><br>
+    <label>Last name: <input type="text" name="last_name" value="{{ user.last_name }}"></label><br>
+    <label>Email: <input type="email" name="email" value="{{ user.email }}"></label><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Profile</legend>
+    {{ profile_form.as_p }}
+  </fieldset>
+
+  <button type="submit">Save changes</button>
+</form>
+{% endblock %}
