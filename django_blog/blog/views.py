@@ -176,3 +176,17 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         comment = self.get_object()
         return comment.author == self.request.user
+
+
+class CommentCreateView(CreateView):
+    model = Comment
+    fields = ['content']  # adjust according to your model fields
+    template_name = 'comment_form.html'  # your template
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post_id = self.kwargs['pk']  # assuming URL has post pk
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('post_detail', kwargs={'pk': self.kwargs['pk']})
