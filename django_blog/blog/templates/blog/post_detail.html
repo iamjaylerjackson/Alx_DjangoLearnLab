@@ -1,14 +1,46 @@
-{% extends "base.html" %}
+{% extends "blog/base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
 {% block content %}
-<h1>{{ post.title }}</h1>
-<p>{{ post.content }}</p>
-<p><strong>Author:</strong> {{ post.author }}</p>
-<p><strong>Published:</strong> {{ post.published_date }}</p>
+<article id="post-{{ post.pk }}">
+  <h1>{{ post.title }}</h1>
+  <p>By {{ post.author.username }} • {{ post.published_date|date:"M d, Y H:i" }}</p>
+  <div>{{ post.content|linebreaks }}</div>
+</article>
 
-{% if user == post.author %}
-    <a href="{% url 'post_update' post.pk %}">Edit</a> |
-    <a href="{% url 'post_delete' post.pk %}">Delete</a>
+<hr>
+<section id="comments">
+  <h2>Comments ({{ post.comments.count }})</h2>
+
+  {% for comment in post.comments.all %}
+    <div id="comment-{{ comment.pk }}" class="comment">
+      <p><strong>{{ comment.author.username }}</strong> <small>{{ comment.created_at|date:"M d, Y H:i" }}</small></p>
+      <p>{{ comment.content|linebreaks }}</p>
+
+      {% if user.is_authenticated and user == comment.author %}
+        <p>
+          <a href="{% url 'comment_edit' post_pk=post.pk pk=comment.pk %}">Edit</a> |
+          <a href="{% url 'comment_delete' post_pk=post.pk pk=comment.pk %}">Delete</a>
+        </p>
+      {% endif %}
+    </div>
+    <hr>
+  {% empty %}
+    <p>No comments yet. Be the first to comment!</p>
+  {% endfor %}
+</section>
+
+{% if user.is_authenticated %}
+  <section id="add-comment">
+    <h3>Leave a comment</h3>
+    <form method="post" action="{% url 'comment_create' post_pk=post.pk %}">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit">Post Comment</button>
+    </form>
+  </section>
+{% else %}
+  <p><a href="{% url 'login' %}?next={% url 'post_detail' post.pk %}">Log in</a> to leave a comment.</p>
 {% endif %}
 
-<a href="{% url 'post_list' %}">Back to list</a>
+<p><a href="{% url 'post_list' %}">Back to posts</a></p>
 {% endblock %}
