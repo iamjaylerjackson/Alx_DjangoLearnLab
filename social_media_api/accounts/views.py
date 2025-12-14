@@ -6,6 +6,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from django.shortcuts import get_object_or_404
+from .models import CustomUser
+from .serializers import UserSerializer
+
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
