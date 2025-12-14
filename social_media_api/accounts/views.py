@@ -1,61 +1,73 @@
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import generics
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
-from .models import User
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-
 from django.shortcuts import get_object_or_404
+
 from .models import CustomUser
-from .serializers import UserSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
-
-def get_tokens_for_user(user):
-    refresh = RefreshToken.for_user(user)
-    return {
-        'refresh': str(refresh),
-        'access': str(refresh.access_token)
-    }
-
-
-# Register View
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
-    def create(self, request, *args, **kwargs):
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        tokens = get_tokens_for_user(user)
 
         return Response({
-            "user": UserSerializer(user).data,
-            "token": tokens
+            "user": UserSerializer(serializer.validated_data['user']).data,
+            "token": serializer.validated_data['token']
         })
 
-# Login View
-
-
-class LoginView(APIView):
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        tokens = get_tokens_for_user(user)
-
-        return Response({
-            "user": UserSerializer(user).data,
-            "token": tokens
-        })
-
-
-# Profile View
 
 class ProfileView(generics.RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
 
     def get_object(self):
         return self.request.user
+
+
+class FollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+
+    def post(self, request, user_id):
+        user_to_follow = get_object_or_404(CustomUser, id=user_id)
+
+        if request.user == user_to_follow:
+            return Response(
+                {"detail": "You cannot follow yourself."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user_to_follow.followers.add(request.user)
+        return Response(
+            {"detail": "User followed successfully."},
+            status=status.HTTP_200_OK
+        )
+
+
+class UnfollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+
+    def post(self, request, user_id):
+        user_to_unfollow = get_object_or_404(CustomUser, id=user_id)
+
+        if request.user == user_to_unfollow:
+            return Response(
+                {"detail": "You cannot unfollow yourself."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user_to_unfollow.followers.remove(request.user)
+        return Response(
+            {"detail": "User unfollowed successfully."},
+            status=status.HTTP_200_OK
+        )
